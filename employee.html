@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profession Management System</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            padding: 0px 22px;
+        }
+
+        h5 {
+            font-size: 1.4rem;
+        }
+
+        .input_box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .name_box,
+        .profession_box,
+        .age_box {
+            display: flex;
+            flex-direction: column;
+            gap: 4;
+            border: none;
+        }
+
+        .name_box,
+        .profession_box,
+        .age_box,
+        input {
+            width: 250px;
+            padding: 8px 12px;
+            background-color: black;
+            margin-top: 7px;
+        }
+
+        input {
+            border: 1px solid white;
+            color: white;
+        }
+
+        .btn {
+            margin-left: 12px;
+            width: 100px;
+            padding: 8px 12px;
+            margin-top: 20px;
+        }
+
+        .msg {
+            margin: 12px 12px;
+            color: green;
+            font-size: 1.2rem;
+        }
+
+        .added_emp {
+            margin: 12px 12px;
+            font-size: 1.2rem;
+        }
+
+        .list_container {
+            /* border: 1px solid white; */
+            width: 500px;
+        }
+
+        .list_box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .paraContainer {
+            display: flex;
+            width: 80%;
+            justify-content: space-around;
+            border: 1px solid white;
+            border-radius: 22px;
+        }
+
+        .list_box p {
+            padding: 1px 12px;
+        }
+
+        .list_box button {
+            width: 100px;
+            height: 40px;
+            margin-right: 12px;
+            border-radius: 22px;
+        }
+
+        .msg_error {
+            color: red;
+        }
+
+        .msg_success {
+            color: green;
+        }
+
+        .data_not_found {
+            width: 100%;
+            text-align: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    
+    <div class="container">
+        <h5>New Employees</h5>
+        <div class="input_box">
+            <div class="name_box">
+                <label>Enter Name</label>
+                <input type="text" placeholder="Enter Name" id="name">
+            </div>
+            <div class="profession_box">
+                <label>Enter Profession</label>
+                <input type="text" placeholder="Enter Profession" id="profession">
+            </div>
+            <div class="age_box">
+                <label>Enter Age</label>
+                <input type="text" placeholder="Enter Age" id="age">
+            </div>
+        </div>
+        <button class="btn" onclick="handleSubmit()">Add User</button>
+        <div class="msg" id="msg_ref">
+
+        </div>
+        <p class="added_emp">Added Employees</p>
+        <div class="list_container" id="container">
+            <div class="data_not_found">Data not found</div>
+        </div>
+    </div>
+    <script>
+        const container = document.getElementById("container");
+
+        function handleSubmit() {
+            let msg = document.getElementById("msg_ref");
+            let name = document.getElementById("name").value;
+            let profession = document.getElementById("profession").value;
+            let age = document.getElementById("age").value;
+            let result = [];
+            var id = "id" + Math.random().toString(16).slice(2);
+
+            if (name === "" || profession === "" || age === "") {
+                msg.innerHTML = `<span class="msg_error" >Error :Please Make sure All the field before adding in an emplyee</span> `;
+                return;
+            } else {
+                msg.innerHTML = `<span class="nsg_success">Success : Message Added</span> `;
+            }
+            let localData = JSON.parse(localStorage.getItem("data"));
+            result.push({ _id: id, name: name, profession: profession, age: age });
+
+            if (localData) {
+                localStorage.setItem("data", JSON.stringify([...localData, ...result]));
+            } else {
+                localStorage.setItem("data", JSON.stringify([...result]));
+            }
+
+            createElement();
+            document.getElementById("name").value = "";
+            document.getElementById("profession").value = "";
+            document.getElementById("age").value = "";
+        }
+
+        function handleDelete(id) {
+            let resultData = JSON.parse(localStorage.getItem("data"));
+            let res = resultData.filter((val) => val._id !== id);
+            localStorage.setItem("data", JSON.stringify(res));
+            createElement();
+        }
+
+        function createElement() {
+            let resultData = JSON.parse(localStorage.getItem("data"));
+
+            if (resultData.length > 0) {
+                container.innerHTML = resultData.map((val, i) => {
+                    return ` <div class="list_box">
+<div class="paraContainer">
+    <p>${val.name}</p>
+    <p>${val.profession}</p>
+    <p>${val.age}</p>
+</div>
+
+<button onclick="handleDelete('${val._id}')" >Delete</button>
+</div> 
+`;
+                });
+            } else {
+                container.innerHTML = `<div class="data_not_found" >Data not found</div>`;
+            }
+        }
+        createElement();
+
+    </script>
+</body>
+
+</html>

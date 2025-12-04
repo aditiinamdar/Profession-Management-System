@@ -114,7 +114,7 @@
 </head>
 
 <body>
-    
+
     <div class="container">
         <h5>New Employees</h5>
         <div class="input_box">
@@ -141,65 +141,93 @@
         </div>
     </div>
     <script>
+        // Main array to store all employees (loaded once from localStorage)
+        let employees = JSON.parse(localStorage.getItem("data")) || [];
+
+        // DOM Elements
         const container = document.getElementById("container");
+        const msgRef = document.getElementById("msg_ref");
+        const nameInput = document.getElementById("name");
+        const professionInput = document.getElementById("profession");
+        const ageInput = document.getElementById("age");
+
+        // Render employees when page loads
+        renderEmployees();
 
         function handleSubmit() {
-            let msg = document.getElementById("msg_ref");
-            let name = document.getElementById("name").value;
-            let profession = document.getElementById("profession").value;
-            let age = document.getElementById("age").value;
-            let result = [];
-            var id = "id" + Math.random().toString(16).slice(2);
+            const name = nameInput.value.trim();
+            const profession = professionInput.value.trim();
+            const age = ageInput.value.trim();
 
-            if (name === "" || profession === "" || age === "") {
-                msg.innerHTML = `<span class="msg_error" >Error :Please Make sure All the field before adding in an emplyee</span> `;
+            // Check if any field is empty
+            if (!name || !profession || !age) {
+                showMessage("Error: Please fill all fields!", "error");
                 return;
-            } else {
-                msg.innerHTML = `<span class="nsg_success">Success : Message Added</span> `;
-            }
-            let localData = JSON.parse(localStorage.getItem("data"));
-            result.push({ _id: id, name: name, profession: profession, age: age });
-
-            if (localData) {
-                localStorage.setItem("data", JSON.stringify([...localData, ...result]));
-            } else {
-                localStorage.setItem("data", JSON.stringify([...result]));
             }
 
-            createElement();
-            document.getElementById("name").value = "";
-            document.getElementById("profession").value = "";
-            document.getElementById("age").value = "";
+            // Create new employee object
+            const newEmployee = {
+                _id: "id" + Math.random().toString(16).slice(2),
+                name,
+                profession,
+                age
+            };
+
+            // Use array.push() to ADD to the array
+            employees.push(newEmployee);
+
+            // Save & refresh UI
+            saveToStorage();
+            renderEmployees();
+            showMessage("Success: Employee added successfully!");
+
+            // Clear form inputs
+            nameInput.value = "";
+            professionInput.value = "";
+            ageInput.value = "";
         }
 
         function handleDelete(id) {
-            let resultData = JSON.parse(localStorage.getItem("data"));
-            let res = resultData.filter((val) => val._id !== id);
-            localStorage.setItem("data", JSON.stringify(res));
-            createElement();
+            // Use array.filter() to REMOVE employee by id
+            employees = employees.filter(employee => employee._id !== id);
+
+            saveToStorage();
+            renderEmployees();
+            showMessage("Employee deleted!");
         }
 
-        function createElement() {
-            let resultData = JSON.parse(localStorage.getItem("data"));
-
-            if (resultData.length > 0) {
-                container.innerHTML = resultData.map((val, i) => {
-                    return ` <div class="list_box">
-<div class="paraContainer">
-    <p>${val.name}</p>
-    <p>${val.profession}</p>
-    <p>${val.age}</p>
-</div>
-
-<button onclick="handleDelete('${val._id}')" >Delete</button>
-</div> 
-`;
-                });
-            } else {
-                container.innerHTML = `<div class="data_not_found" >Data not found</div>`;
+        function renderEmployees() {
+            if (employees.length === 0) {
+                container.innerHTML = '<div class="data_not_found">No employees added yet.</div>';
+                return;
             }
+
+            // Use array.map() to generate HTML for each employee
+            const html = employees.map(emp => `
+        <div class="list_box">
+            <div class="paraContainer">
+                <p><strong>Name:</strong> ${emp.name}</p>
+                <p><strong>Profession:</strong> ${emp.profession}</p>
+                <p><strong>Age:</strong> ${emp.age}</p>
+            </div>
+            <button onclick="handleDelete('${emp._id}')" class="delete-btn">
+                Delete
+            </button>
+        </div>
+    `).join(""); // Important: join array into single string
+
+            container.innerHTML = html;
         }
-        createElement();
+
+        function saveToStorage() {
+            // Save entire array to localStorage in one go
+            localStorage.setItem("data", JSON.stringify(employees));
+        }
+
+        function showMessage(message, type = "success") {
+            msgRef.innerHTML = `<span class="msg_${type}">${message}</span>`;
+            setTimeout(() => msgRef.innerHTML = "", 3000);
+        }
 
     </script>
 </body>
